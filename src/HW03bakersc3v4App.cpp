@@ -6,6 +6,7 @@
 #include "Resources.h"
 #include <iostream>
 #include <fstream>
+#include <math.h>
 
 using namespace ci;
 using namespace ci::app;
@@ -29,8 +30,10 @@ class HW03bakersc3v4App : public AppBasic {
 	uint8_t* dataArray;
 	gl::Texture* texture;
 	gl::Texture* image;
+	void drawLocations(Entry* locations, int numLocations);
+
 	bakersc3Starbucks* panda;
-	Entry* arr;
+	Entry* arr1;
 	void rectangle(uint8_t* pixels, double startx, double starty, double width, double height, Color8u fill);
 
 	static const int appWidth = 800;
@@ -46,15 +49,25 @@ void HW03bakersc3v4App::prepareSettings(Settings* settings){
 
 void HW03bakersc3v4App::setup(){
 	//The surface!
+
 	mySurface = new Surface(textureSize, textureSize, false);
+	//image = new gl::Texture(loadImage(loadResource(RES_IMAGE)));
+	*mySurface = Surface(loadImage(loadResource(RES_IMAGE)));
+	//Surface mySurface(loadImage("usaMap"));
 	texture = new gl::Texture(*mySurface);
-	image = new gl::Texture(loadImage(loadResource(RES_IMAGE)));
+	dataArray = mySurface->getData();
+
+
 
 	//Array initialization.
 	count = 0;
-    arr = createArray();
-	//console() << (arr+5)->identifier << endl;
-	//panda = new bakersc3Starbucks;
+    arr1 = createArray();
+
+	panda = new bakersc3Starbucks;
+	panda->num = count;
+	panda->arr = arr1;
+
+	drawLocations(panda->arr, panda->num);
 }
 
 Entry* HW03bakersc3v4App::createArray(){
@@ -66,17 +79,12 @@ Entry* HW03bakersc3v4App::createArray(){
 	}
     while(in.good()){
         getline(in, storeName, '\r');
-        /*in >> xVal;
-        in.get();
-        in >> yVal;
-        in.get();*/
         count++;
     }
     in.clear();
     in.seekg(0);
 	
 	Entry* stores = new Entry[count];
-    //Entry* stores  = new Entry[7655];
     int i = 0;
     
     while(in.good()){
@@ -97,47 +105,60 @@ Entry* HW03bakersc3v4App::createArray(){
     return stores;
 }
 
-void HW03bakersc3v4App::rectangle(uint8_t* pixels, double startx, double starty, double width, double height, Color8u fill){
-	//double x;
-	//double y;
-
-	// to create the rectangle
-	/*for (y = starty; y < (starty + height); y++){
-		for(x = startx; x < (startx + width); x++){
-			pixels[3*(x + y * textureSize)] = fill.r;
-			pixels[3*(x + y * textureSize) + 1] = fill.g;
-			pixels[3*(x + y * textureSize) + 2] = fill.b;
-		}
-	}*/
+void HW03bakersc3v4App::drawLocations(Entry* locations, int numLocations) {
+	Color color = Color(0,0,250);
+	for (int i = 0; i < numLocations; i++) {
+		double xd = (locations[i].x)*appWidth;
+		int x = floor(xd);
+		double yd = (locations[i].y)*appHeight;
+		int y = floor(appHeight-yd);
+		int index = 3 * (x + y * textureSize);
+		dataArray[index] = color.r;
+		dataArray[index+1] = color.g;
+		dataArray[index+2] = color.b;
+	}
 }
 
 void HW03bakersc3v4App::mouseDown( MouseEvent event ){
-	clicked = true;
 	if(event.isLeft()){
+		//get the click location
 		double x = mousePos.x;
 		double y = mousePos.y;
-		//panda->getNearest(x, y);
+
+		//convert to floats
+		x = x/appWidth;
+		y = y/appHeight;
+
+		Entry* value = panda->getNearest(x, y);
+
+		//color the nearest location differently
+		Color c = Color(50,200,150);
+		double xd = value->x*appWidth;
+		int a = floor(xd);
+		double yd = value->y*appHeight;
+		int b = floor(600-yd);
+		int index = 3 * (a + b * textureSize);
+		dataArray[index] = c.r;
+		dataArray[index+1] = c.g;
+		dataArray[index+2] = c.b;
+
+
 		console() << "clicked!" <<endl;
+		console() << value->identifier << endl;
 	}
 }
 
 void HW03bakersc3v4App::update(){
 	(*texture).update(*mySurface, mySurface->getBounds());
-	
+	//(*image).update(*mySurface, mySurface->getBounds());
 }
 
 void HW03bakersc3v4App::draw(){
 	//gl::color(Color(.1f, .8f, .6f));
-	//gl::draw(*texture);
-	int xoffset = (getWindowWidth()-320)/2;
-	int yoffset = (getWindowHeight()-240)/2;
-	gl::draw(*image, getWindowBounds());
-	Color c = Color(0, 0, 50);
-	/*for(int i = 0; i < 7655; i++){
-		//gl::drawSolidCircle( Vec2f( (arr[i].x)*appWidth, 1-((arr[i].y)*appHeight) ), 2.5f );
-		//console() << arr[1].x << endl;
-		rectangle(dataArray, arr[i].x*appWidth, arr[i].y*appHeight, .01 , .01, c);
-	}*/
+	//gl::draw(*image, getWindowBounds());
+	//gl::draw(*mySurface, getWindowBounds());
+	//gl::draw(*mySurface);
+	gl::draw(*texture, getWindowBounds());
 }
 
 CINDER_APP_BASIC( HW03bakersc3v4App, RendererGl )

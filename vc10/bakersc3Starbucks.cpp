@@ -2,7 +2,6 @@
 
 bakersc3Starbucks::bakersc3Starbucks(){
 	num = 0;
-	arr = 0;
 }
 
 void bakersc3Starbucks::build(Entry* c, int n){
@@ -57,11 +56,11 @@ Entry* bakersc3Starbucks::getNearest(double x, double y){
 //The brute force version to find the nearest neighbor, since
 // my tree isn't working right for some reason.
 Entry* nearest(double x, double y, Entry* arr, int n){
-	Entry* near = (arr + 1);
+	Entry* near = &arr[1];
 	for(int i = 0; i < n; i++){
-		if((((arr+i)->x - x)*((arr+i)->x - x) + ((arr+i)->y - y)*((arr+i)->y - y)) <
+		if(((arr[i].x - x)*(arr[i].x - x) + (arr[i].y - y)*(arr[i].y - y)) <
 			((near->x - x)*(near->x - x) + (near->y - y)*(near->y - y))){
-			near = (arr + i);
+			near = &arr[i];
 		}
 	}
 	return near;
