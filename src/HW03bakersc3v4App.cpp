@@ -31,6 +31,8 @@ class HW03bakersc3v4App : public AppBasic {
 	gl::Texture* texture;
 	gl::Texture* image;
 	void drawLocations(Entry* locations, int numLocations);
+	//void drawLocations(Entry* locations, int numLocations, uint8_t* dataArray);
+	void drawCircle(uint8_t* pixels, int centerx, int centery, int radius, Color8u color);
 
 	bakersc3Starbucks* panda;
 	Entry* arr1;
@@ -48,8 +50,8 @@ void HW03bakersc3v4App::prepareSettings(Settings* settings){
 }
 
 void HW03bakersc3v4App::setup(){
-	//The surface!
-
+	//The surface! I had to play with a bunch of stuff before 
+	// I figured out how to use a texture as the surface. Bleh.
 	mySurface = new Surface(textureSize, textureSize, false);
 	//image = new gl::Texture(loadImage(loadResource(RES_IMAGE)));
 	*mySurface = Surface(loadImage(loadResource(RES_IMAGE)));
@@ -57,12 +59,9 @@ void HW03bakersc3v4App::setup(){
 	texture = new gl::Texture(*mySurface);
 	dataArray = mySurface->getData();
 
-
-
 	//Array initialization.
 	count = 0;
     arr1 = createArray();
-
 	panda = new bakersc3Starbucks;
 	panda->build(arr1, count);
 	drawLocations(arr1, count);
@@ -103,17 +102,31 @@ Entry* HW03bakersc3v4App::createArray(){
     return stores;
 }
 
+void HW03bakersc3v4App::drawCircle(uint8_t* pixels, int centerx, int centery, int radius, Color8u color){
+	if (radius <= 0) 
+		return;
+	for(int y = centery - radius; y <= centery + radius; y++){
+		for(int x = centerx - radius; x <= centerx + radius; x++){
+			int dist = (int)sqrt((double)((x-centerx)*(x-centerx) + (y-centery)*(y-centery)));
+			if (dist <= radius){
+				pixels[3*(x + y * textureSize)] = color.r;
+				pixels[3*(x + y * textureSize) + 1] = color.g;
+				pixels[3*(x + y * textureSize) + 2] = color.b;
+			}
+		}
+	}
+}
+
 void HW03bakersc3v4App::drawLocations(Entry* locations, int numLocations) {
-	Color color = Color(0,0,250);
 	for (int i = 0; i < numLocations; i++) {
 		double xd = (locations[i].x)*appWidth;
 		int x = floor(xd);
 		double yd = (locations[i].y)*appHeight;
 		int y = floor(appHeight-yd);
-		int index = 3 * (x + y * textureSize);
-		dataArray[index] = color.r;
-		dataArray[index+1] = color.g;
-		dataArray[index+2] = color.b;
+		int index = (int)(3 * (x + y * textureSize));
+		dataArray[index] = 0;
+		dataArray[index+1] = 0;
+		dataArray[index+2] = 255;
 	}
 }
 
@@ -123,17 +136,20 @@ void HW03bakersc3v4App::mouseDown( MouseEvent event ){
 		double x = event.getX();
 		double y = event.getY();
 
+		drawCircle(dataArray, x, y, 10, Color8u(50, 200, 150));
+
 		//convert to floats
 		x = x/appWidth;
 		y = 1-(y/appHeight);
 
+		//find nearest location to where you clicked
 		Entry* value = panda->getNearest(x, y);
 
 		//color the nearest location differently
 		Color c = Color(50,200,150);
-		double xd = value->x*appWidth;
+		double xd = (value->x)*appWidth;
 		int a = floor(xd);
-		double yd = value->y*appHeight;
+		double yd = (value->y)*appHeight;
 		int b = floor(appHeight-yd);
 		int index = 3 * (a + b * textureSize);
 		dataArray[index] = c.r;
