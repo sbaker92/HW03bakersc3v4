@@ -4,7 +4,16 @@ bakersc3Starbucks::bakersc3Starbucks(){
 	num = 0;
 }
 
-void bakersc3Starbucks::build(Entry* c, int n){
+void bakersc3Starbucks::build(Entry*c, int n){
+	num = n;
+	arr = new Entry[num];
+	for(int i = 0; i < num; i++){
+		arr[i] = c[i];
+	}
+}
+
+//This was going the be the build method I used for the tree.
+/*void bakersc3Starbucks::build(Entry* c, int n){
 	int m = n;
 	Entry* arr = new Entry[m];
 	for(int i = 0; i < n; i++){
@@ -15,7 +24,7 @@ void bakersc3Starbucks::build(Entry* c, int n){
 		
 	//Tree::tree = new Tree();
 	//Tree::tree->root = Tree::treeBuilder(arr, m);
-}
+}*/
 
 //I keep getting unresolved external errors on this method, and I'm
 // not really certain why. I left the code here to see if I could get 
@@ -49,14 +58,33 @@ void bakersc3Starbucks::build(Entry* c, int n){
 	return root;
 }*/
 
-Entry* bakersc3Starbucks::getNearest(double x, double y){
+/*Entry* bakersc3Starbucks::getNearest(double x, double y){
 	return nearest(x, y, arr, this->num);
+}*/
+
+double bakersc3Starbucks::getDistance(double x, double x2, double y, double y2){
+	return sqrt(((x-x2)*(x-x2))+((y-y2)*(y-y2)));
+}
+
+Entry* bakersc3Starbucks::getNearest(double x, double y){
+	Entry* temp = new Entry();
+	Entry nearest = arr[0];
+	double shortDis = getDistance(arr[0].x, x, arr[0].y, y);
+	for(int i = 1; i < num; i++){
+		double tempDis = getDistance(arr[i].x, x, arr[i].y, y);
+		if(tempDis < shortDis){
+			nearest = arr[i];
+			shortDis = tempDis;
+		}
+	}
+	*temp = nearest;
+	return temp;
 }
 
 //The brute force version to find the nearest neighbor, since
 // my tree isn't working right for some reason.
-Entry* nearest(double x, double y, Entry* arr, int n){
-	Entry* near = &arr[1];
+/*Entry* nearest(double x, double y, Entry* arr1, int n){
+	Entry* near = arr[1];
 	for(int i = 0; i < n; i++){
 		if(((arr[i].x - x)*(arr[i].x - x) + (arr[i].y - y)*(arr[i].y - y)) <
 			((near->x - x)*(near->x - x) + (near->y - y)*(near->y - y))){
@@ -64,7 +92,7 @@ Entry* nearest(double x, double y, Entry* arr, int n){
 		}
 	}
 	return near;
-}
+}*/
 
 Entry* chooseMid(Entry* stores, int n){
 	if((n % 2) != 0)

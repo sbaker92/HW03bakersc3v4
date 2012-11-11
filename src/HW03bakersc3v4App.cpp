@@ -64,10 +64,8 @@ void HW03bakersc3v4App::setup(){
     arr1 = createArray();
 
 	panda = new bakersc3Starbucks;
-	panda->num = count;
-	panda->arr = arr1;
-
-	drawLocations(panda->arr, panda->num);
+	panda->build(arr1, count);
+	drawLocations(arr1, count);
 }
 
 Entry* HW03bakersc3v4App::createArray(){
@@ -122,12 +120,12 @@ void HW03bakersc3v4App::drawLocations(Entry* locations, int numLocations) {
 void HW03bakersc3v4App::mouseDown( MouseEvent event ){
 	if(event.isLeft()){
 		//get the click location
-		double x = mousePos.x;
-		double y = mousePos.y;
+		double x = event.getX();
+		double y = event.getY();
 
 		//convert to floats
 		x = x/appWidth;
-		y = y/appHeight;
+		y = 1-(y/appHeight);
 
 		Entry* value = panda->getNearest(x, y);
 
@@ -136,7 +134,7 @@ void HW03bakersc3v4App::mouseDown( MouseEvent event ){
 		double xd = value->x*appWidth;
 		int a = floor(xd);
 		double yd = value->y*appHeight;
-		int b = floor(600-yd);
+		int b = floor(appHeight-yd);
 		int index = 3 * (a + b * textureSize);
 		dataArray[index] = c.r;
 		dataArray[index+1] = c.g;

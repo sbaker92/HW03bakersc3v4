@@ -7,6 +7,7 @@ public:
 
 	bakersc3Starbucks();
 	~bakersc3Starbucks();
+	double getDistance(double x, double x2, double y, double y2);
 	int num;
 	Entry* arr;
 };
